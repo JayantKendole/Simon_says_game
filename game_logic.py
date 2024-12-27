@@ -91,15 +91,11 @@ def start_game_logic(cap, speaker_callback):
 
             if result_hands.multi_hand_landmarks:
                 for hand_landmarks in result_hands.multi_hand_landmarks:
-                    thumb_up, thumb_down = check_thumbs_action(hand_landmarks)
-                    finger_count = check_fingers_action(hand_landmarks)
-
-            # Parse the finger count from the instruction if needed
-            expected_fingers = None
-            if "show" in random_action:
-                # Extract the expected number of fingers
-                try:
-                    expected_fingers = int(random_action.split()[-2])
+                    fingers_count = check_fingers_action(hand_landmarks)
+                    if "thumbs up" in random_action and fingers_count == 1:
+                        action_performed = True
+                    elif "show" in random_action:
+                        expected_fingers = int(random_action.split()[-2])
                 except ValueError:
                     expected_fingers = None
 
@@ -126,13 +122,7 @@ def start_game_logic(cap, speaker_callback):
                     game_over = True
                     break
 
-            # Display the score and camera feed
-            cv2.putText(frame, f"Score: {score}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-            cv2.imshow("Simon Says - Camera Feed", frame)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                game_over = True
-                break
+        score_display.update_score()
 
     cap.release()
     cv2.destroyAllWindows()
